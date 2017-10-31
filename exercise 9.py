@@ -86,3 +86,10 @@ print 1 - scipy.stats.chi2.cdf(x=D, df=1) # insig
 
 
 #3
+leaf = pandas.read_csv('leafDecomp.csv')
+print leaf
+d = (ggplot(data=leaf)
+     + aes(x= "Ms", y= "decomp")
+     + geom_point()
+     )
+print d
