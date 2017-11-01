@@ -21,7 +21,7 @@ p= (ggplot(data=grouped)
     + geom_bar(stat = "identity")
     + theme_classic()
     )
-print p
+# print p
 
 # format and subset dataframes
 pondat.columns = ['mutation', 'y'] # rename col
@@ -86,10 +86,38 @@ print 1 - scipy.stats.chi2.cdf(x=D, df=1) # insig
 
 
 #3
-leaf = pandas.read_csv('leafDecomp.csv')
+
+leaf = pandas.read_csv('leafDecomp.csv') # load data
 print leaf
 d = (ggplot(data=leaf)
      + aes(x= "Ms", y= "decomp")
      + geom_point()
      )
 print d
+
+# simple functions
+def simple (p, obs):
+    B0 = p[0]
+    sigma = p[1]
+    expected = B0
+    nll = -1*norm(expected, sigma).logpdf(obs.y).sum()
+    return nll
+
+# alt1 function
+def complex (p, obs):
+    B0 = p[0]
+    B1 = p[1]
+    sigma = p[2]
+    expected =B0+B1*obs.x
+    nll = -1*norm(expected, sigma).logpdf(obs.y).sum()
+    return nll
+
+# more complex alt
+def morecomplex (p, obs):
+    B0 = p[0]
+    B1 = p[1]
+    B2 = p[2]
+    sigma = p[3]
+    expected =B0+B1*obs.x+B2*(obs.x)^2
+    nll = -1*norm(expected, sigma).logpdf(obs.y).sum()
+    return nll
