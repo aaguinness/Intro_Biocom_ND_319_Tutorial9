@@ -83,8 +83,14 @@ print 1 - scipy.stats.chi2.cdf(x=D, df=1) # insig
 
 
 #2
+bakturriuh = pandas.read_csv("MmarinumGrowth.csv")
 
-
+def nullbac(p, obs):
+    B0 = p[0]
+    sigma = p[1]
+    expected = mumax*(S/S+Ks)
+    nll = -1*norm(expected, sigma).logpdf(obs.y).sum()
+    return nll
 
 
 
