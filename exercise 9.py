@@ -21,7 +21,7 @@ p= (ggplot(data=grouped)
     + geom_bar(stat = "identity")
     + theme_classic()
     )
-# print p
+print p
 
 # format and subset dataframes
 pondat.columns = ['mutation', 'y'] # rename col
