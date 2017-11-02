@@ -86,13 +86,19 @@ print 1 - scipy.stats.chi2.cdf(x=D, df=1) # insig
 bakturriuh = pandas.read_csv("MmarinumGrowth.csv")
 
 def nullbac(p, obs):
-    B0 = p[0]
-    sigma = p[1]
-    expected = mumax*(S/S+Ks)
-    nll = -1*norm(expected, sigma).logpdf(obs.y).sum()
+    mu_max = p[0]
+    K = p[1]
+    sigma = p[2]
+    
+    mu = mu_max * (bakturriuh.S / bakturriuh.S + K)
+    nll = -1*norm(mu, sigma).logpdf(bakturriuh.u).sum()
     return nll
 
+guesslist = numpy.array([1,1,1]) #not a guestlist
 
+BacMLL = minimize(nullbac, guesslist, method="Nelder-Mead", options={'disp':True}, args=bakturriuh)
+print "Bacterial growth estimates"
+print BacMLL
 
 #3
 
