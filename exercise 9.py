@@ -117,16 +117,19 @@ def morecomplex (p, obs):
     B1 = p[1]
     B2 = p[2]
     sigma = p[3]
-    expected =B0+B1*(obs.Ms)+B2*((obs.Ms)^2)
+    expected =B0+(B1*(obs.Ms))+(B2*(obs.Ms*obs.Ms))
     nll = -1*norm(expected, sigma).logpdf(obs.decomp).sum()
     return nll
 
 initialGuess = numpy.array([1,1,1,1])
+comGuess = numpy.array([200,10,-.2,1])
 
 # null to linear
 fitNull = minimize(simple, initialGuess, method="Nelder-Mead", options={'disp':True}, args=leaf)
 fitAlter = minimize(complex, initialGuess, method="Nelder-Mead", options={'disp':True}, args=leaf)
+print "null or simple model values"
 print fitNull #these values are right compared to Stuart's answers
+print "complex or linear model values"
 print fitAlter # these values are right compared to Stuart's answers
 D = 2*(fitNull.fun-fitAlter.fun)
 print "simple to linear model = sig!"
@@ -134,9 +137,24 @@ print 1 - scipy.stats.chi2.cdf(x=D, df=1)
 
 # linear to quadratic
 fitNull = minimize(complex, initialGuess, method="Nelder-Mead", options={'disp':True}, args=leaf)
-fitAlter = minimize(morecomplex, initialGuess, method="Nelder-Mead", options={'disp':True}, args=leaf)
-
+fitAlter = minimize(morecomplex, comGuess, method="Nelder-Mead", options={'disp':True}, args=leaf)
+print "complex/linear model values"
+print fitNull
+print "quadratic model values"
+print fitAlter
 print "linear model to quadratic = sig!"
 print 1 - scipy.stats.chi2.cdf(x=D, df=1)
 
-#check degrees of freedomand how to extract proper values from the printed lists.
+
+# null to quadratic
+fitNull = minimize(simple, initialGuess, method="Nelder-Mead", options={'disp':True}, args=leaf)
+fitAlter = minimize(morecomplex, comGuess, method="Nelder-Mead", options={'disp':True}, args=leaf)
+print "null values"
+print fitNull
+print "quadratic model values"
+print fitAlter
+print "simple model to quadratic = sig!"
+print 1 - scipy.stats.chi2.cdf(x=D, df=2)
+
+
+## according to our calcs, we should use the hump shaped model!!
