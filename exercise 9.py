@@ -95,10 +95,75 @@ def nullbac(p, obs):
 
 
 #3
-leaf = pandas.read_csv('leafDecomp.csv')
-print leaf
+
+leaf = pandas.read_csv('leafDecomp.csv') # load data
 d = (ggplot(data=leaf)
      + aes(x= "Ms", y= "decomp")
      + geom_point()
      )
 print d
+
+# simple functions
+def simple (p, obs):
+    B0 = p[0]
+    sigma = p[1]
+    expected = B0
+    nll = -1*norm(expected, sigma).logpdf(obs.decomp).sum()
+    return nll
+
+# alt1 function
+def complex (p, obs):
+    B0 = p[0]
+    B1 = p[1]
+    sigma = p[2]
+    expected =B0+B1*obs.Ms
+    nll = -1*norm(expected, sigma).logpdf(obs.decomp).sum()
+    return nll
+
+# more complex alt
+def morecomplex (p, obs):
+    B0 = p[0]
+    B1 = p[1]
+    B2 = p[2]
+    sigma = p[3]
+    expected =B0+(B1*(obs.Ms))+(B2*(obs.Ms*obs.Ms))
+    nll = -1*norm(expected, sigma).logpdf(obs.decomp).sum()
+    return nll
+
+initialGuess = numpy.array([1,1,1,1])
+comGuess = numpy.array([200,10,-.2,1])
+
+# null to linear
+fitNull = minimize(simple, initialGuess, method="Nelder-Mead", options={'disp':True}, args=leaf)
+fitAlter = minimize(complex, initialGuess, method="Nelder-Mead", options={'disp':True}, args=leaf)
+print "null or simple model values"
+print fitNull #these values are right compared to Stuart's answers
+print "complex or linear model values"
+print fitAlter # these values are right compared to Stuart's answers
+D = 2*(fitNull.fun-fitAlter.fun)
+print "simple to linear model = sig!"
+print 1 - scipy.stats.chi2.cdf(x=D, df=1)
+
+# linear to quadratic
+fitNull = minimize(complex, initialGuess, method="Nelder-Mead", options={'disp':True}, args=leaf)
+fitAlter = minimize(morecomplex, comGuess, method="Nelder-Mead", options={'disp':True}, args=leaf)
+print "complex/linear model values"
+print fitNull
+print "quadratic model values"
+print fitAlter
+print "linear model to quadratic = sig!"
+print 1 - scipy.stats.chi2.cdf(x=D, df=1)
+
+
+# null to quadratic
+fitNull = minimize(simple, initialGuess, method="Nelder-Mead", options={'disp':True}, args=leaf)
+fitAlter = minimize(morecomplex, comGuess, method="Nelder-Mead", options={'disp':True}, args=leaf)
+print "null values"
+print fitNull
+print "quadratic model values"
+print fitAlter
+print "simple model to quadratic = sig!"
+print 1 - scipy.stats.chi2.cdf(x=D, df=2)
+
+
+## according to our calcs, we should use the hump shaped model!!
