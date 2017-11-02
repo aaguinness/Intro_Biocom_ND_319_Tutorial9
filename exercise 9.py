@@ -88,7 +88,6 @@ print 1 - scipy.stats.chi2.cdf(x=D, df=1) # insig
 #3
 
 leaf = pandas.read_csv('leafDecomp.csv') # load data
-print leaf
 d = (ggplot(data=leaf)
      + aes(x= "Ms", y= "decomp")
      + geom_point()
@@ -100,7 +99,7 @@ def simple (p, obs):
     B0 = p[0]
     sigma = p[1]
     expected = B0
-    nll = -1*norm(expected, sigma).logpdf(obs.y).sum()
+    nll = -1*norm(expected, sigma).logpdf(obs.decomp).sum()
     return nll
 
 # alt1 function
@@ -108,8 +107,8 @@ def complex (p, obs):
     B0 = p[0]
     B1 = p[1]
     sigma = p[2]
-    expected =B0+B1*obs.x
-    nll = -1*norm(expected, sigma).logpdf(obs.y).sum()
+    expected =B0+B1*obs.Ms
+    nll = -1*norm(expected, sigma).logpdf(obs.decomp).sum()
     return nll
 
 # more complex alt
@@ -118,6 +117,26 @@ def morecomplex (p, obs):
     B1 = p[1]
     B2 = p[2]
     sigma = p[3]
-    expected =B0+B1*obs.x+B2*(obs.x)^2
-    nll = -1*norm(expected, sigma).logpdf(obs.y).sum()
+    expected =B0+B1*(obs.Ms)+B2*((obs.Ms)^2)
+    nll = -1*norm(expected, sigma).logpdf(obs.decomp).sum()
     return nll
+
+initialGuess = numpy.array([1,1,1,1])
+
+# null to linear
+fitNull = minimize(simple, initialGuess, method="Nelder-Mead", options={'disp':True}, args=leaf)
+fitAlter = minimize(complex, initialGuess, method="Nelder-Mead", options={'disp':True}, args=leaf)
+print fitNull #these values are right compared to Stuart's answers
+print fitAlter # these values are right compared to Stuart's answers
+D = 2*(fitNull.fun-fitAlter.fun)
+print "simple to linear model = sig!"
+print 1 - scipy.stats.chi2.cdf(x=D, df=1)
+
+# linear to quadratic
+fitNull = minimize(complex, initialGuess, method="Nelder-Mead", options={'disp':True}, args=leaf)
+fitAlter = minimize(morecomplex, initialGuess, method="Nelder-Mead", options={'disp':True}, args=leaf)
+
+print "linear model to quadratic = sig!"
+print 1 - scipy.stats.chi2.cdf(x=D, df=1)
+
+#check degrees of freedomand how to extract proper values from the printed lists.
